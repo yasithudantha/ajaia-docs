@@ -43,3 +43,44 @@ Use the **"Acting as"** user switcher in the top-right navigation bar to test ow
 ```bash
 git clone [https://github.com/yasithudantha/ajaia-docs.git](https://github.com/yasithudantha/ajaia-docs.git)
 cd ajaia-docs
+```
+
+### 2. Start the Backend (`server/`)
+```bash
+cd server
+npm install
+```
+Create `server/.env`:
+```env
+DATABASE_URL=postgresql://YOUR_USER:YOUR_PASSWORD@YOUR_HOST/neondb?sslmode=require
+PORT=5000
+CORS_ORIGIN=http://localhost:5173
+```
+Run the server (automatically creates tables and seeds demo users/documents on startup):
+```bash
+npm start
+```
+The API runs at `http://localhost:5000`.
+
+### 3. Start the Frontend (`client/`)
+Open a new terminal in `ajaia-docs/client`:
+```bash
+cd client
+npm install
+```
+Create `client/.env`:
+```env
+VITE_API_URL=http://localhost:5000
+```
+Run the development server:
+```bash
+npm run dev
+```
+Open `http://localhost:5173` in your browser.
+
+### 4. Run Automated Integration Tests
+From `ajaia-docs/server`:
+```bash
+npm test
+```
+The Vitest + Supertest suite verifies document creation, unauthorized `403` isolation, `Viewer` read-only enforcement, `Editor` upgrade permissions, unsupported file extension rejection (`400`), and `.md` file import conversion.
