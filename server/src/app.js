@@ -96,6 +96,19 @@ async function getDocumentWithAccess(docId, userId) {
   return rows[0] || null;
 }
 
+// Root API info endpoint
+app.get('/', (_req, res) => {
+  res.json({
+    service: 'Ajaia Docs API',
+    status: 'ok',
+    endpoints: {
+      health: '/api/health',
+      users: '/api/users',
+      documents: '/api/documents',
+    },
+  });
+});
+
 // Health check
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
