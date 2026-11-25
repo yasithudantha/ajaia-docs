@@ -3,9 +3,20 @@ import cors from 'cors';
 import multer from 'multer';
 import { marked } from 'marked';
 import mammoth from 'mammoth';
-import { pool } from './db.js';
+import { initDb, pool } from './db.js';
 
 export const app = express();
+
+let dbReadyPromise = null;
+function ensureDbInitialized() {
+  if (!dbReadyPromise) {
+    dbReadyPromise = initDb().catch((err) => {
+      dbReadyPromise = null;
+      throw err;
+    });
+  }
+  return dbReadyPromise;
+}
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
@@ -24,6 +35,16 @@ app.use(
   })
 );
 app.use(express.json({ limit: '2mb' }));
+
+// Ensure Neon PostgreSQL schema & seed data are initialized before handling requests
+app.use(async (_req, _res, next) => {
+  try {
+    await ensureDbInitialized();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Multer in-memory storage (2MB max)
 const upload = multer({
@@ -349,3 +370,5 @@ app.use((err, _req, res, _next) => {
   console.error(err);
   res.status(500).json({ error: err.message || 'Internal server error' });
 });
+
+export default app;
